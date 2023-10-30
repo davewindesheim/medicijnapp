@@ -3,13 +3,16 @@ import { StyleSheet, Text, View, Button, TouchableOpacity, FlatList } from 'reac
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import Profile from './screens/Profile'; 
+import Search from './screens/Search'; 
+import SearchModal from './screens/SearchModal'; 
 
 const Stack = createNativeStackNavigator();
 
 function Home({ navigation }) {
   const data = [
-    { id: '1', name: 'Paracetamol', brand: 'HealthyPharm', days: ['Wednesday'], time: '1100', amount: '2', weight: '150 mg' },
-    { id: '2', name: 'Azathioprine', brand: 'Mylan', days: ['Wednesday'], time: '610', amount: '5', weight: '100 mg' },
+    { id: '1', name: 'Paracetamol', brand: 'HealthyPharm', days: ['Thursday'], time: '1100', amount: '2', weight: '150 mg' },
+    { id: '2', name: 'Azathioprine', brand: 'Mylan', days: ['Thursday'], time: '610', amount: '5', weight: '100 mg' },
     { id: '3', name: 'De Pil', brand: 'Yasmin', days: ['Daily'], time: '540', amount: '1', weight: '200 mg' },
     { id: '4', name: 'Ibuprofen', brand: 'HealthyPharm', days: ['Daily'], time: '915', amount: '1', weight: '200 mg' },
   ];
@@ -74,26 +77,10 @@ function Home({ navigation }) {
   );
 }
 
-function Search() {
-  return (
-    <View style={styles.container}>
-      <Text>Search Screen</Text>
-    </View>
-  );
-}
-
 function Settings() {
   return (
     <View style={styles.container}>
       <Text>Settings Screen</Text>
-    </View>
-  );
-}
-
-function Profile() {
-  return (
-    <View style={styles.container}>
-      <Text>Profile Screen</Text>
     </View>
   );
 }
@@ -130,7 +117,20 @@ export default function App() {
             headerTitle: '',
           })}
         />
-        <Stack.Screen name="Search" component={Search} />
+        <Stack.Screen
+          name="Search"
+          component={Search}
+          options={({ navigation }) => ({
+            headerRight: () => (
+              <TouchableOpacity
+                style={{ marginRight: 10, marginTop: 5 }}
+                onPress={() => { navigation.navigate('Settings') }}>
+                <FontAwesomeIcon name="plus" size={30} color="#0096FF" />
+              </TouchableOpacity>
+            ),
+            headerTitle: 'Search',
+          })}
+        />
         <Stack.Screen name="Settings" component={Settings} />
         <Stack.Screen name="Profile" component={Profile} />
       </Stack.Navigator>
@@ -172,5 +172,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginTop: 40,
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingLeft: 10,
+    width: 200,
   },
 });
