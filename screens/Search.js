@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import SearchModal from './SearchModal'; // Import SearchModal
+import { View, TextInput, Button, StyleSheet } from 'react-native';
 
 const Search = () => {
   const [searchText, setSearchText] = useState('');
-  const [modalVisible, setModalVisible] = useState(false); // Add modal visibility state
 
   const handleSearch = () => {
-    // Implement your search functionality here
     console.log('Search:', searchText);
-    // You can use the searchText to perform your search logic
   };
 
   return (
@@ -21,14 +17,6 @@ const Search = () => {
         onChangeText={(text) => setSearchText(text)}
       />
       <Button title="Search" onPress={handleSearch} />
-
-      {/* Add a button to open the modal */}
-      <TouchableOpacity onPress={() => setModalVisible(true)}>
-        <Text style={styles.buttonText}>Open Search Modal</Text>
-      </TouchableOpacity>
-
-      {/* Render the SearchModal */}
-      <SearchModal visible={modalVisible} onClose={() => setModalVisible(false)} onSearch={handleSearch} />
     </View>
   );
 };
@@ -46,11 +34,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 10,
     paddingLeft: 10,
-  },
-  buttonText: {
-    color: '#0096FF',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });
 

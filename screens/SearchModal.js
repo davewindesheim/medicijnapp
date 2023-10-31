@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Modal } from 'react-native';
 
-const SearchModal = ({ visible, onClose, onSearch }) => {
+const SearchModal = ({ visible, onClose, onSearch, navigation }) => {
   const [medicine, setMedicine] = useState('');
   const [brand, setBrand] = useState('');
   const [days, setDays] = useState('');
@@ -10,10 +10,13 @@ const SearchModal = ({ visible, onClose, onSearch }) => {
   const [weight, setWeight] = useState('');
 
   const handleSearch = () => {
-    // Implement your search functionality here
     const searchData = { medicine, brand, days, time, amount, weight };
     onSearch(searchData);
-    onClose(); // Close the modal after searching
+    onClose();
+  };
+
+  const handlePress = () => {
+    navigation.goBack();
   };
 
   return (
@@ -55,8 +58,8 @@ const SearchModal = ({ visible, onClose, onSearch }) => {
           value={weight}
           onChangeText={(text) => setWeight(text)}
         />
-        <Button title="Search" onPress={handleSearch} />
-        <Button title="Close" onPress={onClose} />
+        <Button title="Add Medicine" onPress={handleSearch} />
+        <Button title="Close" onPress={handlePress} />
       </View>
     </Modal>
   );

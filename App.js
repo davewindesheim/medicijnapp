@@ -1,21 +1,22 @@
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, Text, View, Button, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
-import Profile from './screens/Profile'; 
-import Search from './screens/Search'; 
-import SearchModal from './screens/SearchModal'; 
+import Profile from './screens/Profile';
+import Search from './screens/Search';
+import SearchModal from './screens/SearchModal';
 
 const Stack = createNativeStackNavigator();
 
 function Home({ navigation }) {
-  const data = [
-    { id: '1', name: 'Paracetamol', brand: 'HealthyPharm', days: ['Thursday'], time: '1100', amount: '2', weight: '150 mg' },
-    { id: '2', name: 'Azathioprine', brand: 'Mylan', days: ['Thursday'], time: '610', amount: '5', weight: '100 mg' },
+  const [data, setData] = useState([
+    { id: '1', name: 'Paracetamol', brand: 'HealthyPharm', days: ['Wednesday'], time: '1100', amount: '2', weight: '150 mg' },
+    { id: '2', name: 'Azathioprine', brand: 'Mylan', days: ['Wednesday'], time: '610', amount: '5', weight: '100 mg' },
     { id: '3', name: 'De Pil', brand: 'Yasmin', days: ['Daily'], time: '540', amount: '1', weight: '200 mg' },
     { id: '4', name: 'Ibuprofen', brand: 'HealthyPharm', days: ['Daily'], time: '915', amount: '1', weight: '200 mg' },
-  ];
+  ]);
   const currentDate = new Date();
   const tomorrowDate = new Date();
   tomorrowDate.setDate(currentDate.getDate() + 1);
@@ -30,6 +31,25 @@ function Home({ navigation }) {
   todayItems.sort((a, b) => parseInt(a.time) - parseInt(b.time));
   tomorrowItems.sort((a, b) => parseInt(a.time) - parseInt(b.time));
 
+  const handleItemClick = (itemId, itemName) => {
+    Alert.alert(
+      `${itemName} verwijderen`,
+      `Weet je zeker dat je ${itemName} wilt verwijderen?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+            setData(prevData => prevData.filter(i => i.id !== itemId));
+          },
+        },
+      ]
+    );
+  };
+
   const renderItem = ({ item }) => {
     const timeInMinutes = parseInt(item.time);
     const hours = Math.floor(timeInMinutes / 60);
@@ -37,11 +57,13 @@ function Home({ navigation }) {
     const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 
     return (
-      <View style={styles.listItem} key={item.id}>
-        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
-          {item.amount}x {item.name}, {item.brand} | {formattedTime}
-        </Text>
-      </View>
+      <TouchableOpacity onPress={() => handleItemClick(item.id, item.name)}>
+        <View style={styles.listItem} key={item.id}>
+          <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
+            {item.amount}x {item.name}, {item.brand} | {formattedTime}
+          </Text>
+        </View>
+      </TouchableOpacity>
     );
   };
 
@@ -124,7 +146,7 @@ export default function App() {
             headerRight: () => (
               <TouchableOpacity
                 style={{ marginRight: 10, marginTop: 5 }}
-                onPress={() => { navigation.navigate('Settings') }}>
+                onPress={() => navigation.navigate('SearchModal')}>
                 <FontAwesomeIcon name="plus" size={30} color="#0096FF" />
               </TouchableOpacity>
             ),
@@ -133,6 +155,11 @@ export default function App() {
         />
         <Stack.Screen name="Settings" component={Settings} />
         <Stack.Screen name="Profile" component={Profile} />
+        <Stack.Screen
+          name="SearchModal"
+          component={SearchModal}
+          options={{ headerShown: false }} 
+        />
       </Stack.Navigator>
       <StatusBar style="auto" />
     </NavigationContainer>
