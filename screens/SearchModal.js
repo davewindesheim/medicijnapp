@@ -103,6 +103,12 @@ const SearchModal = ({ visible, navigation }) => {
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
         <View style={styles.modalContainer}>
           <View style={styles.modal}>
+            <View style={styles.headerContainer}>
+              <TouchableOpacity onPress={handlePress} style={styles.headerButton}>
+                <FontAwesome name="times-circle" size={26} color="lightgrey" />
+              </TouchableOpacity>
+              <Text style={styles.headerTitle}>Medicijngegevens</Text>
+            </View>
             <TextInput
               style={styles.input}
               placeholder="Medicijnnaam"
@@ -167,8 +173,6 @@ const SearchModal = ({ visible, navigation }) => {
             </View>
             <View style={styles.buttonContainer}>
               <Button title="Voeg medicijn toe" onPress={handleSearch} style={styles.button} />
-              <View style={{ marginTop: 10 }} />
-              <Button title="Terug" onPress={handlePress} style={styles.button} />
             </View>
           </View>
         </View>
@@ -191,15 +195,16 @@ const styles = StyleSheet.create({
     width: '80%',
   },
   scrollViewContainer: {
-    flexGrow: 1, // Make sure the content can grow to fill the ScrollView
+    flexGrow: 1,
   },
   input: {
     height: 40,
     borderColor: 'gray',
-    borderWidth: 1,
+    borderBottomWidth: 1,
     marginBottom: 10,
     width: '100%',
-    paddingLeft: 10,
+    paddingLeft: 0, // Adjusted paddingLeft
+    paddingRight: 0, // Added paddingRight
   },
   weightInputContainer: {
     flexDirection: 'row',
@@ -209,13 +214,14 @@ const styles = StyleSheet.create({
   weightInput: {
     height: 40,
     borderColor: 'gray',
-    borderWidth: 1,
+    borderBottomWidth: 1,
     marginBottom: 10,
     width: '48%',
-    paddingLeft: 10,
+    paddingLeft: 0, // Adjusted paddingLeft
+    paddingRight: 0, // Added paddingRight
   },
   calculationResultText: {
-    marginLeft: 10,
+    marginLeft: 0,
     color: 'gray',
     fontSize: 16,
   },
@@ -251,7 +257,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'column',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 20,
     width: '100%',
   },
   button: {
@@ -279,6 +285,20 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: 20,
     fontWeight: 'bold',
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  headerButton: {
+    marginRight: 10,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#0096FF',
+    marginLeft: 20,
   },
 });
 
