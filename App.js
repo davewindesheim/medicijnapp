@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Button, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
@@ -7,15 +7,16 @@ import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Profile from './screens/Profile';
 import Search from './screens/Search';
 import SearchModal from './screens/SearchModal';
+import Settings from './screens/Settings';
 
 const Stack = createNativeStackNavigator();
 
-function Home({ navigation }) {
+function Home({ navigation, route }) {
   const [data, setData] = useState([
-    { id: '1', name: 'Paracetamol', brand: 'HealthyPharm', days: ['Wednesday'], time: '1100', amount: '2', weight: '150 mg' },
-    { id: '2', name: 'Azathioprine', brand: 'Mylan', days: ['Wednesday'], time: '610', amount: '5', weight: '100 mg' },
-    { id: '3', name: 'De Pil', brand: 'Yasmin', days: ['Daily'], time: '540', amount: '1', weight: '200 mg' },
-    { id: '4', name: 'Ibuprofen', brand: 'HealthyPharm', days: ['Daily'], time: '915', amount: '1', weight: '200 mg' },
+    { id: 1, name: 'Paracetamol', brand: 'HealthyPharm', days: ['Wednesday'], time: '1100', amount: '2', weight: '150', weightUnit: 'mg', },
+    { id: 2, name: 'Azathioprine', brand: 'Mylan', days: ['Wednesday'], time: '610', amount: '5', weight: '100', weightUnit: 'mg', },
+    { id: 3, name: 'De Pil', brand: 'Yasmin', days: ['Daily'], time: '540', amount: '1', weight: '200', weightUnit: 'mcg', },
+    { id: 4, name: 'Ibuprofen', brand: 'HealthyPharm', days: ['Daily'], time: '915', amount: '1', weight: '200', weightUnit: 'mcg', },
   ]);
   const currentDate = new Date();
   const tomorrowDate = new Date();
@@ -31,17 +32,23 @@ function Home({ navigation }) {
   todayItems.sort((a, b) => parseInt(a.time) - parseInt(b.time));
   tomorrowItems.sort((a, b) => parseInt(a.time) - parseInt(b.time));
 
+  useEffect(() => {
+    if (route.params?.searchData) {
+      setData(prevData => [...prevData, route.params.searchData]);
+    }
+  }, [route.params?.searchData]);
+
   const handleItemClick = (itemId, itemName) => {
     Alert.alert(
       `${itemName} verwijderen`,
       `Weet je zeker dat je ${itemName} wilt verwijderen?`,
       [
         {
-          text: 'Cancel',
+          text: 'Nee',
           style: 'cancel',
         },
         {
-          text: 'OK',
+          text: 'Ja',
           onPress: () => {
             setData(prevData => prevData.filter(i => i.id !== itemId));
           },
@@ -55,7 +62,7 @@ function Home({ navigation }) {
     const hours = Math.floor(timeInMinutes / 60);
     const minutes = timeInMinutes % 60;
     const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-
+  
     return (
       <TouchableOpacity onPress={() => handleItemClick(item.id, item.name)}>
         <View style={styles.listItem} key={item.id}>
@@ -95,14 +102,6 @@ function Home({ navigation }) {
           <Text style={{ ...styles.buttonText, textAlign: 'center' }}>Zoek medicijn</Text>
         </TouchableOpacity>
       </View>
-    </View>
-  );
-}
-
-function Settings() {
-  return (
-    <View style={styles.container}>
-      <Text>Settings Screen</Text>
     </View>
   );
 }
