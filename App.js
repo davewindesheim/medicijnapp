@@ -208,7 +208,7 @@ export default function App() {
                 <FontAwesomeIcon name="plus" size={30} color="#0096FF" />
               </TouchableOpacity>
             ),
-            headerTitle: 'Search',
+            headerTitle: 'Zoeken',
           })}
         />
         <Stack.Screen name="Settings" component={Settings} />

@@ -5,14 +5,14 @@ import { v4 as uuidv4 } from 'uuid';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { FontAwesome } from '@expo/vector-icons';
 
-const SearchModal = ({ visible, navigation }) => {
-  const [name, setMedicine] = useState('');
-  const [brand, setBrand] = useState('');
+const SearchModal = ({ visible, selectedItem, navigation }) => {
+  const [name, setMedicine] = useState(selectedItem ? selectedItem.name : '');
+  const [brand, setBrand] = useState(selectedItem ? selectedItem.brand : '');
   const [amount, setAmount] = useState('');
-  const [weight, setWeight] = useState('');
+  const [weight, setWeight] = useState(selectedItem ? selectedItem.weight : '');
+  const [weightUnit, setWeightUnit] = useState(selectedItem ? selectedItem.weightUnit : 'mg');
   const [selectedDays, setSelectedDays] = useState([]);
   const [calculationResult, setCalculationResult] = useState(0);
-  const [weightUnit, setWeightUnit] = useState('mg');
   const [selectedTime, setSelectedTime] = useState(new Date());
   const [showTimePicker, setShowTimePicker] = useState(false);
 
@@ -203,8 +203,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     marginBottom: 10,
     width: '100%',
-    paddingLeft: 0, // Adjusted paddingLeft
-    paddingRight: 0, // Added paddingRight
+    paddingLeft: 0,
+    paddingRight: 0,
   },
   weightInputContainer: {
     flexDirection: 'row',
