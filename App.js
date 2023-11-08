@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Button, TouchableOpacity, FlatList } from 'react-native';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
@@ -9,7 +10,10 @@ import SearchModal from './screens/SearchModal';
 
 const Stack = createNativeStackNavigator();
 
-function Home({ navigation }) {
+function Home({ navigation, route }) {
+
+  const { firstName, lastName } = route.params || { firstName: 'Sigrid', lastName: 'Kaag' };
+  
   const data = [
     { id: '1', name: 'Paracetamol', brand: 'HealthyPharm', days: ['Thursday'], time: '1100', amount: '2', weight: '150 mg' },
     { id: '2', name: 'Azathioprine', brand: 'Mylan', days: ['Thursday'], time: '610', amount: '5', weight: '100 mg' },
@@ -64,9 +68,7 @@ function Home({ navigation }) {
         />
       </View>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Search')}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Search')}>
           <View style={{ ...styles.iconContainer, alignItems: 'center' }}>
             <FontAwesomeIcon name="search" size={50} color="#0096FF" />
           </View>
@@ -86,6 +88,11 @@ function Settings() {
 }
 
 export default function App() {
+  const [user, setUser] = useState({ firstName: 'Sigrid', lastName: 'Kaag' }); // Initialize user state
+
+  const updateUserInfo = (firstName, lastName) => {
+    setUser({ firstName, lastName }); // Update user state
+  };
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -95,7 +102,6 @@ export default function App() {
         }}>
         <Stack.Screen
           name="Home"
-          component={Home}
           options={({ navigation }) => ({
             headerRight: () => (
               <TouchableOpacity
@@ -105,18 +111,24 @@ export default function App() {
               </TouchableOpacity>
             ),
             headerLeft: () => (
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 5 }}>
-                <TouchableOpacity
-                  onPress={() => { navigation.navigate('Profile') }}
-                  style={{ marginRight: 10 }}>
-                  <FontAwesomeIcon name="user" size={30} color="#0096FF" />
-                </TouchableOpacity>
-                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Sigrid Kaag</Text>
+              <View style={styles.header}>
+                <View style={styles.headerLeft}>
+                  <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <FontAwesomeIcon name="user" size={30} color="#0096FF" />
+                      <Text style={{ fontSize: 18, fontWeight: 'bold', marginLeft: 10 }}>
+                        {user.firstName} {user.lastName}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
               </View>
             ),
             headerTitle: '',
           })}
-        />
+        >
+          {(props) => <Home {...props} user={user} />}
+        </Stack.Screen>
         <Stack.Screen
           name="Search"
           component={Search}
@@ -124,7 +136,7 @@ export default function App() {
             headerRight: () => (
               <TouchableOpacity
                 style={{ marginRight: 10, marginTop: 5 }}
-                onPress={() => { navigation.navigate('Settings') }}>
+                onPress={() => navigation.navigate('SearchModal')}>
                 <FontAwesomeIcon name="plus" size={30} color="#0096FF" />
               </TouchableOpacity>
             ),
@@ -132,12 +144,20 @@ export default function App() {
           })}
         />
         <Stack.Screen name="Settings" component={Settings} />
-        <Stack.Screen name="Profile" component={Profile} />
+        <Stack.Screen
+          name="Profile"
+          options={{
+            headerTitle: 'Edit Profile',
+          }}
+        >
+          {(props) => <Profile {...props} user={user} updateUserInfo={updateUserInfo} />}
+        </Stack.Screen>
       </Stack.Navigator>
       <StatusBar style="auto" />
     </NavigationContainer>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
