@@ -228,7 +228,6 @@ export default function App() {
         >
           {(props) => <Profile {...props} user={user} updateUserInfo={updateUserInfo} />}
         </Stack.Screen>
-        <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen
           name="SearchModal"
           component={SearchModal}
