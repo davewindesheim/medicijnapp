@@ -164,11 +164,28 @@ function Home({ navigation, route }) {
 }
 
 export default function App() {
-  const [user, setUser] = useState({ firstName: 'Sigrid', lastName: 'Kaag' }); // Initialize user state
+  const [user, setUser] = useState({ firstName: '', lastName: '' }); // Initialize user state
 
   const updateUserInfo = (firstName, lastName) => {
     setUser({ firstName, lastName }); // Update user state
   };
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const storedUserInfo = await AsyncStorage.getItem('userInfo');
+        if (storedUserInfo) {
+          const userInfo = JSON.parse(storedUserInfo);
+          setUser(userInfo);
+        }
+      } catch (error) {
+        console.error('Error loading user info:', error);
+      }
+    };
+
+    loadUserData();
+  }, []);
+
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -219,11 +236,15 @@ export default function App() {
             headerTitle: 'Zoeken',
           })}
         />
-        <Stack.Screen name="Settings" component={Settings} />
+        <Stack.Screen name="Settings" 
+            component={Settings} 
+            options={{
+            headerTitle: 'Instellingen',
+          }}/>
         <Stack.Screen
           name="Profile"
           options={{
-            headerTitle: 'Edit Profile',
+            headerTitle: 'Profiel',
           }}
         >
           {(props) => <Profile {...props} user={user} updateUserInfo={updateUserInfo} />}
