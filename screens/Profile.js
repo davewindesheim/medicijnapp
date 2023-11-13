@@ -1,39 +1,75 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
-function Profile({user, updateUserInfo} ) {
-  const [firstName, setFirstName] = useState(user.firstName); // State to store first name
-  const [lastName, setLastName] = useState(user.lastName);   // State to store last name
+
+function Profile({ updateUserInfo }) {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [age, setAge] = useState('');
 
   const navigation = useNavigation();
 
-  // Function to handle the save button click
-  const handleSave = () => {
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const storedUserInfo = await AsyncStorage.getItem('userInfo');
+        if (storedUserInfo) {
+          const userInfo = JSON.parse(storedUserInfo);
+          setFirstName(userInfo.firstName);
+          setLastName(userInfo.lastName);
+          setAge(userInfo.age);
+        }
+      } catch (error) {
+        console.error('Error loading user info:', error);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const handleSave = async () => {
     updateUserInfo(firstName, lastName);
-    navigation.goBack(); // Navigate back to the previous screen
+
+    try {
+      const userInfo = { firstName, lastName, age };
+      await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
+    } catch (error) {
+      console.error('Error saving user info:', error);
+    }
+
+    navigation.goBack();
   };
-  
+
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>First Name</Text>
+        <Text style={styles.label}>Voornaam</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter your first name"
+          placeholder="Vul uw voornaam in"
           value={firstName}
           onChangeText={(text) => setFirstName(text)}
         />
       </View>
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Last Name</Text>
+        <Text style={styles.label}>Achternaam</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter your last name"
+          placeholder="Vul uw achternaam in"
           value={lastName}
           onChangeText={(text) => setLastName(text)}
+        />
+      </View>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Leeftijd</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Vul uw leeftijd in"
+          value={age}
+          onChangeText={(text) => setAge(text)}
         />
       </View>
       <View style={styles.buttonContainer}>
@@ -41,6 +77,9 @@ function Profile({user, updateUserInfo} ) {
           <Text style={styles.buttonText}>Save</Text>
         </TouchableOpacity>
       </View>
+      <TouchableOpacity style={styles.buttonContainer}>
+        <Icon name="qrcode" size={50} color="black" />
+      </TouchableOpacity>
     </View>
   );
 }
