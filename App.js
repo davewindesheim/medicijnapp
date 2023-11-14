@@ -9,6 +9,7 @@ import Profile from './screens/Profile';
 import Search from './screens/Search';
 import SearchModal from './screens/SearchModal';
 import Settings from './screens/Settings';
+import MedicineSupply from './screens/MedicineSupply';
 
 const Stack = createNativeStackNavigator();
 
@@ -87,19 +88,19 @@ function Home({ navigation, route }) {
     const hours = Math.floor(timeInMinutes / 60);
     const minutes = timeInMinutes % 60;
     const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-  
+
     return (
       <TouchableOpacity onPress={() => handleItemClick(item.id, item.name)}>
         <View style={styles.listItem} key={item.id}>
           <Text style={styles.amount}>{item.amount}x</Text>
-            <Text style={styles.medAndBrand} numberOfLines={1}>{item.name}, {item.brand}</Text>
+          <Text style={styles.medAndBrand} numberOfLines={1}>{item.name}, {item.brand}</Text>
           <Text style={styles.time}>{formattedTime}</Text>
         </View>
       </TouchableOpacity>
     );
   };
-  
-  
+
+
   const toggleShowMoreToday = () => {
     setShowMoreToday(!showMoreToday);
   };
@@ -164,10 +165,10 @@ function Home({ navigation, route }) {
 }
 
 export default function App() {
-  const [user, setUser] = useState({ firstName: '', lastName: '' }); // Initialize user state
+  const [user, setUser] = useState({ firstName: '', lastName: '' });
 
   const updateUserInfo = (firstName, lastName) => {
-    setUser({ firstName, lastName }); // Update user state
+    setUser({ firstName, lastName });
   };
 
   useEffect(() => {
@@ -197,11 +198,19 @@ export default function App() {
           name="Home"
           options={({ navigation }) => ({
             headerRight: () => (
-              <TouchableOpacity
-                style={{ marginRight: 10, marginTop: 5 }}
-                onPress={() => { navigation.navigate('Settings') }}>
-                <FontAwesomeIcon name="gear" size={30} color="#0096FF" />
-              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', marginRight: 10, marginTop: 5 }}>
+                <TouchableOpacity
+                  onPress={() => { navigation.navigate('MedicineSupply') }}
+                  style={{ marginRight: 10 }}
+                >
+                  <FontAwesomeIcon name="medkit" size={30} color="#0096FF" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => { navigation.navigate('Settings') }}
+                >
+                  <FontAwesomeIcon name="gear" size={30} color="#0096FF" />
+                </TouchableOpacity>
+              </View>
             ),
             headerLeft: () => (
               <View style={styles.header}>
@@ -236,16 +245,21 @@ export default function App() {
             headerTitle: 'Zoeken',
           })}
         />
-        <Stack.Screen name="Settings" 
-            component={Settings} 
-            options={{
+        <Stack.Screen name="Settings"
+          component={Settings}
+          options={{
             headerTitle: 'Instellingen',
-          }}/>
+          }} />
         <Stack.Screen
           name="Profile"
-          options={{
+          options={({ navigation }) => ({
             headerTitle: 'Profiel',
-          }}
+            headerRight: () => (
+              <TouchableOpacity onPress={() => console.log('QR gedrukt')}>
+                <FontAwesomeIcon name="qrcode" size={30} color="black" style={{ marginRight: 10 }} />
+              </TouchableOpacity>
+            ),
+          })}
         >
           {(props) => <Profile {...props} user={user} updateUserInfo={updateUserInfo} />}
         </Stack.Screen>
@@ -253,6 +267,13 @@ export default function App() {
           name="SearchModal"
           component={SearchModal}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="MedicineSupply"
+          component={MedicineSupply}
+          options={{
+            headerTitle: 'Medicijnvoorraad',
+          }}
         />
       </Stack.Navigator>
       <StatusBar style="auto" />
