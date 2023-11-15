@@ -4,7 +4,7 @@ import { StyleSheet, Text, View, Button, TouchableOpacity, FlatList, Alert } fro
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import { MaterialIcons, FontAwesome } from '@expo/vector-icons'; 
 import Profile from './screens/Profile';
 import Search from './screens/Search';
 import SearchModal from './screens/SearchModal';
@@ -17,6 +17,7 @@ function Home({ navigation, route }) {
   const [data, setData] = useState([]);
   const [showMoreToday, setShowMoreToday] = useState(false);
   const [showMoreTomorrow, setShowMoreTomorrow] = useState(false);
+  
 
   const loadData = async () => {
     try {
@@ -155,7 +156,7 @@ function Home({ navigation, route }) {
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Search')}>
           <View style={{ ...styles.iconContainer, alignItems: 'center' }}>
-            <FontAwesomeIcon name="search" size={50} color="#0096FF" />
+            <FontAwesome name="search" size={50} color="#0096FF" />
           </View>
           <Text style={{ ...styles.buttonText, textAlign: 'center' }}>Zoek medicijn</Text>
         </TouchableOpacity>
@@ -203,12 +204,12 @@ export default function App() {
                   onPress={() => { navigation.navigate('MedicineSupply') }}
                   style={{ marginRight: 10 }}
                 >
-                  <FontAwesomeIcon name="medkit" size={30} color="#0096FF" />
+                  <MaterialIcons name="inventory" size={30} color="#0096FF" />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => { navigation.navigate('Settings') }}
                 >
-                  <FontAwesomeIcon name="gear" size={30} color="#0096FF" />
+                  <FontAwesome name="gear" size={30} color="#0096FF" />
                 </TouchableOpacity>
               </View>
             ),
@@ -217,7 +218,7 @@ export default function App() {
                 <View style={styles.headerLeft}>
                   <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <FontAwesomeIcon name="user" size={30} color="#0096FF" />
+                      <FontAwesome name="user" size={30} color="#0096FF" />
                       <Text style={{ fontSize: 18, fontWeight: 'bold', marginLeft: 10 }}>
                         {user.firstName} {user.lastName}
                       </Text>
@@ -239,7 +240,7 @@ export default function App() {
               <TouchableOpacity
                 style={{ marginRight: 10, marginTop: 5 }}
                 onPress={() => navigation.navigate('SearchModal')}>
-                <FontAwesomeIcon name="plus" size={30} color="#0096FF" />
+                <FontAwesome name="plus" size={30} color="#0096FF" />
               </TouchableOpacity>
             ),
             headerTitle: 'Zoeken',
@@ -256,7 +257,7 @@ export default function App() {
             headerTitle: 'Profiel',
             headerRight: () => (
               <TouchableOpacity onPress={() => console.log('QR gedrukt')}>
-                <FontAwesomeIcon name="qrcode" size={30} color="black" style={{ marginRight: 10 }} />
+                <FontAwesome name="qrcode" size={30} color="black" style={{ marginRight: 10 }} />
               </TouchableOpacity>
             ),
           })}
@@ -301,6 +302,10 @@ const styles = StyleSheet.create({
     marginTop: 60,
     marginBottom: 20,
     alignSelf: 'center',
+  },
+  iconContainer: {
+    marginBottom: 10,
+    marginRight: 10,
   },
   buttonText: {
     color: '#0096FF',
