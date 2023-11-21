@@ -4,7 +4,8 @@ import { StyleSheet, Text, View, Button, TouchableOpacity, FlatList, Alert } fro
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MaterialIcons, FontAwesome } from '@expo/vector-icons'; 
+import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
+import * as Notifications from 'expo-notifications';
 import Profile from './screens/Profile';
 import Search from './screens/Search';
 import SearchModal from './screens/SearchModal';
@@ -17,17 +18,34 @@ function Home({ navigation, route }) {
   const [data, setData] = useState([]);
   const [showMoreToday, setShowMoreToday] = useState(false);
   const [showMoreTomorrow, setShowMoreTomorrow] = useState(false);
-  
 
   const loadData = async () => {
     try {
       const storedData = await AsyncStorage.getItem('medicines');
       if (storedData) {
-        setData(JSON.parse(storedData));
+        const parsedData = JSON.parse(storedData);
+  
+        await Notifications.cancelAllScheduledNotificationsAsync();
+  
+        setData(parsedData);
+  
+        parsedData.forEach((item) => {
+          if (item.days.includes('Daily') || item.days.includes(currentDay)) {
+            scheduleNotification(item);
+          }
+        });
+  
+        await logScheduledNotifications();
       }
     } catch (error) {
       console.error('Error loading data:', error);
     }
+  };
+  
+
+  const logScheduledNotifications = async () => {
+    const allScheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
+    console.log('All scheduled notifications:', allScheduledNotifications);
   };
 
   const saveData = async (newData) => {
@@ -78,11 +96,56 @@ function Home({ navigation, route }) {
           onPress: async () => {
             const newData = data.filter(i => i.id !== itemId);
             saveData(newData);
+
+            // Load data again to update the schedule
+            loadData();
           },
         },
       ]
     );
   };
+
+  const scheduleNotification = async (item) => {
+    if (!item.notificationEnabled) {
+      return; // Don't schedule notification if it's disabled
+    }
+    const { id, name, amount, time } = item;
+    const timeInMinutes = parseInt(time);
+    const hours = Math.floor(timeInMinutes / 60);
+    const minutes = timeInMinutes % 60;
+  
+    const trigger = new Date();
+    trigger.setHours(hours, minutes, 0, 0);
+  
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Medicijn herinnering',
+        body: `Het is tijd om ${amount}x ${name} te nemen`,
+      },
+      trigger,
+    });
+  };
+  
+
+  const toggleNotification = async (itemId) => {
+    const newData = data.map(item => {
+      if (item.id === itemId) {
+        const updatedItem = { ...item, notificationEnabled: !item.notificationEnabled };
+        if (updatedItem.notificationEnabled) {
+          scheduleNotification(updatedItem);
+        } else {
+          Notifications.cancelScheduledNotificationAsync(item.id.toString());
+        }
+        return updatedItem;
+      }
+      return item;
+    });
+  
+    saveData(newData);
+  
+    loadData();
+  };
+
 
   const renderItem = ({ item }) => {
     const timeInMinutes = parseInt(item.time);
@@ -95,7 +158,9 @@ function Home({ navigation, route }) {
         <View style={styles.listItem} key={item.id}>
           <Text style={styles.amount}>{item.amount}x</Text>
           <Text style={styles.medAndBrand} numberOfLines={1}>{item.name}, {item.brand}</Text>
-          <Text style={styles.time}>{formattedTime}</Text>
+          <Text style={item.notificationEnabled ? styles.time : styles.crossedOutTime} onPress={() => toggleNotification(item.id)}>
+            {formattedTime}
+          </Text>
         </View>
       </TouchableOpacity>
     );
@@ -344,5 +409,11 @@ const styles = StyleSheet.create({
   time: {
     fontWeight: 'bold',
     fontSize: 15,
+  },
+  crossedOutTime: {
+    fontWeight: 'bold',
+    fontSize: 15,
+    textDecorationLine: 'line-through',
+    color: 'gray',
   },
 });

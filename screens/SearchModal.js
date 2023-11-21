@@ -68,6 +68,7 @@ const SearchModal = ({ visible, selectedItem, navigation }) => {
       amount: amountInt,
       weight: weightInGrams,
       weightUnit: weightUnit,
+      notificationEnabled: true,
     };
     navigation.navigate('Home', { searchData });
   };
