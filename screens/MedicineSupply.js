@@ -145,7 +145,7 @@ const MedicineSupply = () => {
                 <TouchableOpacity key={index} style={styles.medicineContainer} onPress={() => handleOpenModal(index)}>
                     <View style={styles.medicineInfo}>
                         <Text style={styles.medicineName}>{medicine.name}, {medicine.brand}</Text>
-                        <Text style={styles.medicineDetails}>{medicine.weight}{medicine.weightUnit}</Text>
+                        <Text style={styles.medicineDetails}><Text style={styles.medicineAmount}>{medicine.amount}x</Text> {medicine.weight}{medicine.weightUnit}</Text>
                     </View>
                     <View style={styles.medicineDaysContainer}>
                         <Text style={styles.medicineDaysLeft}>
@@ -237,6 +237,10 @@ const styles = StyleSheet.create({
     },
     medicineDetails: {
         fontSize: 16,
+        fontWeight: 'bold',
+    },
+    medicineAmount: {
+        fontSize: 12,
         fontWeight: 'bold',
     },
     medicineDaysContainer: {
