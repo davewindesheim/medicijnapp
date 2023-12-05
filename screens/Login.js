@@ -12,7 +12,7 @@ const Login = () => {
     };
 
     const handleLogin = () => {
-        console.log('Login test');
+        console.log('Login testing');
     };
 
     return (
