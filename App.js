@@ -9,7 +9,7 @@ import * as Notifications from 'expo-notifications';
 import Profile from './screens/Profile';
 import Search from './screens/Search';
 import SearchModal from './screens/SearchModal';
-import Settings from './screens/Settings';
+import Settings from './screens/Settings';	
 import MedicineSupply from './screens/MedicineSupply';
 
 const Stack = createNativeStackNavigator();
@@ -39,7 +39,7 @@ function Home({ navigation, route }) {
       console.error('Error loading data:', error);
     }
   };
-
+ 
   const saveData = async (newData) => {
     try {
       await AsyncStorage.setItem('medicines', JSON.stringify(newData));
@@ -86,8 +86,22 @@ function Home({ navigation, route }) {
         {
           text: 'Ja',
           onPress: async () => {
+            const deletedItem = data.find(i => i.id === itemId);
             const newData = data.filter(i => i.id !== itemId);
             saveData(newData);
+
+            const deletionDate = new Date().toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' });
+
+            
+            const deletedMedicineInfo = await AsyncStorage.getItem('deleted_medicines');          
+            let updatedDeletedMedicines = deletedMedicineInfo ? JSON.parse(deletedMedicineInfo) : []; 
+            updatedDeletedMedicines = [...updatedDeletedMedicines, { ...deletedItem, deletionDate }];
+            const updatedDeletedMedicinesString = JSON.stringify(updatedDeletedMedicines);
+            await AsyncStorage.setItem('deleted_medicines', updatedDeletedMedicinesString);
+
+            setDeletedMedicines(updatedDeletedMedicines);
+
+            console.log(updatedDeletedMedicines);
 
             // Load data again to update the schedule
             loadData();
@@ -96,6 +110,8 @@ function Home({ navigation, route }) {
       ]
     );
   };
+
+  const [deletedMedicines, setDeletedMedicines] = useState([]);
 
   const scheduleNotification = async (item) => {
     if (!item.notificationEnabled) {
