@@ -3,13 +3,16 @@ import { ScrollView, View, Text, TouchableOpacity, StyleSheet, Modal, ToastAndro
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
 
-const MedicineSupply = () => {
+const MedicineSupply = ({ handleItemClick }) => {
     const [medicines, setMedicines] = useState([]);
     const [stockInputs, setStockInputs] = useState([]);
     const [sortCriteria, setSortCriteria] = useState('name');
     const [selectedItemIndex, setSelectedItemIndex] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [deletedMedicines, setDeletedMedicines] = useState([]);
+    const [showDeleted, setShowDeleted] = useState(false);
 
     useEffect(() => {
         const getMedicinesFromStorage = async () => {
@@ -124,88 +127,135 @@ const MedicineSupply = () => {
         return `${day}-${month}-${year}`;
     };
 
-    return (
-        <ScrollView style={styles.container}>
-            <View style={styles.sortContainer}>
-                <Picker
-                    selectedValue={sortCriteria}
-                    style={styles.sortPicker}
-                    onValueChange={(itemValue) => {
-                        setSortCriteria(itemValue);
-                        sortMedicines(itemValue);
-                    }}
-                >
-                    <Picker.Item label="Naam A-Z" value="nameAZ" />
-                    <Picker.Item label="Naam Z-A" value="nameZA" />
-                    <Picker.Item label="Meeste dagen voorraad" value="mostStock" />
-                    <Picker.Item label="Minste dagen voorraad" value="leastStock" />
-                </Picker>
-            </View>
-            {medicines.map((medicine, index) => (
-                <TouchableOpacity key={index} style={styles.medicineContainer} onPress={() => handleOpenModal(index)}>
-                    <View style={styles.medicineInfo}>
-                        <Text style={styles.medicineName}>{medicine.name}, {medicine.brand}</Text>
-                        <Text style={styles.medicineDetails}>{medicine.weight}{medicine.weightUnit}</Text>
-                    </View>
-                    <View style={styles.medicineDaysContainer}>
-                        <Text style={styles.medicineDaysLeft}>
-                            Nog {Math.floor(medicine.stock / medicine.amount)} dagen voorraad
-                        </Text>
-                        <Text style={styles.medicineEndDate}>
-                            t/m {calculateEndDate(medicine)}
-                        </Text>
-                    </View>
-                </TouchableOpacity>
-            ))}
+    const handleSwitchView = async () => {
+        setShowDeleted(!showDeleted);
 
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={handleCloseModal}
+        if (!showDeleted) {
+            const deletedMedicineJSON = await AsyncStorage.getItem('deleted_medicines');
+            if (deletedMedicineJSON !== null){
+              const deletedMedicines = JSON.parse(deletedMedicineJSON)
+              console.log(deletedMedicines)
+              setDeletedMedicines(deletedMedicines)
+            }
+          }
+      };
+
+      return (
+        <ScrollView style={styles.container}>
+          <View style={styles.sortContainer}>
+            <Picker
+              selectedValue={sortCriteria}
+              style={styles.sortPicker}
+              onValueChange={(itemValue) => {
+                setSortCriteria(itemValue);
+                sortMedicines(itemValue);
+              }}
             >
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <TouchableOpacity onPress={handleCloseModal} style={styles.modalCloseButton}>
-                                <FontAwesome name="times-circle" size={26} color="lightgrey" />
-                            </TouchableOpacity>
-                            <Text style={styles.modalHeaderTitle}>Voorraad aanpassen</Text>
-                        </View>
-                        <View style={styles.modalStockInputContainer}>
-                            <TouchableOpacity
-                                onPress={handleDecreaseStock}
-                                style={[
-                                    styles.modalStockButton,
-                                    { backgroundColor: stockInputs[selectedItemIndex] <= '0' || !stockInputs[selectedItemIndex] ? '#ccc' : '#007bff' },
-                                ]}
-                                disabled={stockInputs[selectedItemIndex] <= '0' || !stockInputs[selectedItemIndex]}
-                            >
-                                <FontAwesome name="minus" size={20} color="white" />
-                            </TouchableOpacity>
-                            <TextInput
-                                style={styles.modalStockInputText}
-                                keyboardType="numeric"
-                                value={stockInputs[selectedItemIndex] || ''}
-                                onChangeText={(text) => setStockInputs((prevStockInputs) => {
-                                    const sanitizedInput = text.replace(/[^0-9]/g, '');
-                                    const updatedStockInputs = [...prevStockInputs];
-                                    updatedStockInputs[selectedItemIndex] = sanitizedInput;
-                                    return updatedStockInputs;
-                                })}
-                            />
-                            <TouchableOpacity onPress={handleIncreaseStock} style={styles.modalStockButton}>
-                                <FontAwesome name="plus" size={20} color="white" />
-                            </TouchableOpacity>
-                        </View>
-                        <TouchableOpacity onPress={handleAddStock} style={styles.modalAddButton}>
-                            <Text style={styles.modalAddButtonText}>Voeg voorraad toe</Text>
-                        </TouchableOpacity>
-                    </View>
+              <Picker.Item label="Naam A-Z" value="nameAZ" />
+              <Picker.Item label="Naam Z-A" value="nameZA" />
+              <Picker.Item label="Meeste dagen voorraad" value="mostStock" />
+              <Picker.Item label="Minste dagen voorraad" value="leastStock" />
+            </Picker>
+          </View>
+          <TouchableOpacity
+            style={styles.garbageBinButton}
+            onPress={handleSwitchView}
+          >
+            {showDeleted ? (
+                <FontAwesome5 name="pills" size={30} color="#0096FF" />
+              ) : (
+                <FontAwesome name="trash" size={30} color="#0096FF" />
+              )}
+          </TouchableOpacity>
+          {showDeleted ? (
+            deletedMedicines.map((medicine, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.medicineContainer}
+                onPress={() => handleItemClick(medicine.id, medicine.name)}
+              >
+                <View style={styles.medicineInfo}>
+                  <Text style={styles.medicineName}>{medicine.name}, {medicine.brand}</Text>
+                  <Text style={styles.medicineDetails}>{medicine.weight}{medicine.weightUnit}</Text>
                 </View>
-            </Modal>
+                <View style={styles.medicineDaysContainer}>
+                  <Text style={styles.medicineDaysLeft}>
+                    Verwijderd op {medicine.deletionDate}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))
+          ) : (
+            medicines.map((medicine, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.medicineContainer}
+                onPress={() => handleOpenModal(index)}
+              >
+                <View style={styles.medicineInfo}>
+                  <Text style={styles.medicineName}>{medicine.name}, {medicine.brand}</Text>
+                  <Text style={styles.medicineDetails}>{medicine.weight}{medicine.weightUnit}</Text>
+                </View>
+                <View style={styles.medicineDaysContainer}>
+                  <Text style={styles.medicineDaysLeft}>
+                    Nog {Math.floor(medicine.stock / medicine.amount)} dagen voorraad
+                  </Text>
+                  <Text style={styles.medicineEndDate}>
+                    t/m {calculateEndDate(medicine)}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))
+          )}
+    
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={handleCloseModal}
+          >
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <TouchableOpacity onPress={handleCloseModal} style={styles.modalCloseButton}>
+                    <FontAwesome name="times-circle" size={26} color="lightgrey" />
+                  </TouchableOpacity>
+                  <Text style={styles.modalHeaderTitle}>Voorraad aanpassen</Text>
+                </View>
+                <View style={styles.modalStockInputContainer}>
+                  <TouchableOpacity
+                    onPress={handleDecreaseStock}
+                    style={[
+                      styles.modalStockButton,
+                      { backgroundColor: stockInputs[selectedItemIndex] <= '0' || !stockInputs[selectedItemIndex] ? '#ccc' : '#007bff' },
+                    ]}
+                    disabled={stockInputs[selectedItemIndex] <= '0' || !stockInputs[selectedItemIndex]}
+                  >
+                    <FontAwesome name="minus" size={20} color="white" />
+                  </TouchableOpacity>
+                  <TextInput
+                    style={styles.modalStockInputText}
+                    keyboardType="numeric"
+                    value={stockInputs[selectedItemIndex] || ''}
+                    onChangeText={(text) => setStockInputs((prevStockInputs) => {
+                      const sanitizedInput = text.replace(/[^0-9]/g, '');
+                      const updatedStockInputs = [...prevStockInputs];
+                      updatedStockInputs[selectedItemIndex] = sanitizedInput;
+                      return updatedStockInputs;
+                    })}
+                  />
+                  <TouchableOpacity onPress={handleIncreaseStock} style={styles.modalStockButton}>
+                    <FontAwesome name="plus" size={20} color="white" />
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity onPress={handleAddStock} style={styles.modalAddButton}>
+                  <Text style={styles.modalAddButtonText}>Voeg voorraad toe</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
         </ScrollView>
-    );
+      );
 };
 
 const styles = StyleSheet.create({
@@ -214,7 +264,7 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     sortContainer: {
-        marginBottom: 10,
+        marginBottom: 30,
     },
     sortPicker: {
         height: 50,
@@ -225,6 +275,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#f0f0f0',
         padding: 10,
         borderRadius: 10,
+    },
+    garbageBinButton: {
+    position: 'absolute',
+    top: 45, // Adjust the top value as needed
+    right: 10,
     },
     medicineInfo: {
         flexDirection: 'row',
