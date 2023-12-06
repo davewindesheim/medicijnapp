@@ -6,7 +6,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { FontAwesome } from '@expo/vector-icons';
 
 const SearchModal = ({ visible, selectedItem, navigation }) => {
-  const [name, setMedicine] = useState(selectedItem ? selectedItem.name : '');
+  const [name, setMedicine] = useState(selectedItem ? selectedItem.PRODUCTNAAM : '');
   const [brand, setBrand] = useState(selectedItem ? selectedItem.brand : '');
   const [amount, setAmount] = useState('');
   const [weight, setWeight] = useState(selectedItem ? selectedItem.weight : '');

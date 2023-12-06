@@ -139,7 +139,7 @@ const MedicineSupply = ({ handleItemClick }) => {
             }
           }
       };
-
+  
       return (
         <ScrollView style={styles.container}>
           <View style={styles.sortContainer}>
@@ -292,6 +292,10 @@ const styles = StyleSheet.create({
     },
     medicineDetails: {
         fontSize: 16,
+        fontWeight: 'bold',
+    },
+    medicineAmount: {
+        fontSize: 12,
         fontWeight: 'bold',
     },
     medicineDaysContainer: {

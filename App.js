@@ -34,19 +34,12 @@ function Home({ navigation, route }) {
             scheduleNotification(item);
           }
         });
-  
-        await logScheduledNotifications();
       }
     } catch (error) {
       console.error('Error loading data:', error);
     }
   };
-  
-
-  const logScheduledNotifications = async () => {
-    const allScheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
-  };
-
+ 
   const saveData = async (newData) => {
     try {
       await AsyncStorage.setItem('medicines', JSON.stringify(newData));
@@ -122,7 +115,7 @@ function Home({ navigation, route }) {
 
   const scheduleNotification = async (item) => {
     if (!item.notificationEnabled) {
-      return; // Don't schedule notification if it's disabled
+      return;
     }
     const { id, name, amount, time } = item;
     const timeInMinutes = parseInt(time);
@@ -408,7 +401,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
-    justifyContent: 'space-between', // Added this line
+    justifyContent: 'space-between',
   },
   amount: {
     fontWeight: 'bold',
