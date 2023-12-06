@@ -90,8 +90,7 @@ function Home({ navigation, route }) {
             const newData = data.filter(i => i.id !== itemId);
             saveData(newData);
 
-            const deletionDate = new Date().toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' });
-
+            const deletionDate = new Date().toISOString();
             
             const deletedMedicineInfo = await AsyncStorage.getItem('deleted_medicines');          
             let updatedDeletedMedicines = deletedMedicineInfo ? JSON.parse(deletedMedicineInfo) : []; 
@@ -101,9 +100,6 @@ function Home({ navigation, route }) {
 
             setDeletedMedicines(updatedDeletedMedicines);
 
-            console.log(updatedDeletedMedicines);
-
-            // Load data again to update the schedule
             loadData();
           },
         },
