@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button, TouchableOpacity, FlatList, Alert } from 'react-native';
+import { StyleSheet, Text, View, Button, TouchableOpacity, FlatList, Alert, ToastAndroid } from 'react-native';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,8 +9,10 @@ import * as Notifications from 'expo-notifications';
 import Profile from './screens/Profile';
 import Search from './screens/Search';
 import SearchModal from './screens/SearchModal';
-import Settings from './screens/Settings';	
+import Settings from './screens/Settings';
 import MedicineSupply from './screens/MedicineSupply';
+import Login from './screens/Login';
+import Register from './screens/Register';
 
 const Stack = createNativeStackNavigator();
 
@@ -24,11 +26,11 @@ function Home({ navigation, route }) {
       const storedData = await AsyncStorage.getItem('medicines');
       if (storedData) {
         const parsedData = JSON.parse(storedData);
-  
+
         await Notifications.cancelAllScheduledNotificationsAsync();
-  
+
         setData(parsedData);
-  
+
         parsedData.forEach((item) => {
           if (item.days.includes('Daily') || item.days.includes(currentDay)) {
             scheduleNotification(item);
@@ -39,7 +41,7 @@ function Home({ navigation, route }) {
       console.error('Error loading data:', error);
     }
   };
- 
+
   const saveData = async (newData) => {
     try {
       await AsyncStorage.setItem('medicines', JSON.stringify(newData));
@@ -92,9 +94,9 @@ function Home({ navigation, route }) {
 
             const deletionDate = new Date().toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' });
 
-            
-            const deletedMedicineInfo = await AsyncStorage.getItem('deleted_medicines');          
-            let updatedDeletedMedicines = deletedMedicineInfo ? JSON.parse(deletedMedicineInfo) : []; 
+
+            const deletedMedicineInfo = await AsyncStorage.getItem('deleted_medicines');
+            let updatedDeletedMedicines = deletedMedicineInfo ? JSON.parse(deletedMedicineInfo) : [];
             updatedDeletedMedicines = [...updatedDeletedMedicines, { ...deletedItem, deletionDate }];
             const updatedDeletedMedicinesString = JSON.stringify(updatedDeletedMedicines);
             await AsyncStorage.setItem('deleted_medicines', updatedDeletedMedicinesString);
@@ -103,7 +105,7 @@ function Home({ navigation, route }) {
 
             console.log(updatedDeletedMedicines);
 
-            // Load data again to update the schedule
+            ToastAndroid.show(`${itemName} Succesvol verwijderd`, ToastAndroid.SHORT);
             loadData();
           },
         },
@@ -121,10 +123,10 @@ function Home({ navigation, route }) {
     const timeInMinutes = parseInt(time);
     const hours = Math.floor(timeInMinutes / 60);
     const minutes = timeInMinutes % 60;
-  
+
     const trigger = new Date();
     trigger.setHours(hours, minutes, 0, 0);
-  
+
     await Notifications.scheduleNotificationAsync({
       content: {
         title: 'Medicijn herinnering',
@@ -133,7 +135,7 @@ function Home({ navigation, route }) {
       trigger,
     });
   };
-  
+
 
   const toggleNotification = async (itemId) => {
     const newData = data.map(item => {
@@ -148,9 +150,9 @@ function Home({ navigation, route }) {
       }
       return item;
     });
-  
+
     saveData(newData);
-  
+
     loadData();
   };
 
@@ -240,6 +242,11 @@ function Home({ navigation, route }) {
 
 export default function App() {
   const [user, setUser] = useState({ firstName: '', lastName: '' });
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  const handleLoginSuccess = () => {
+    setLoggedIn(true);
+  };
 
   const updateUserInfo = (firstName, lastName) => {
     setUser({ firstName, lastName });
@@ -263,93 +270,114 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerShadowVisible: false,
-          headerTitleAlign: 'center',
-        }}>
-        <Stack.Screen
-          name="Home"
-          options={({ navigation }) => ({
-            headerRight: () => (
-              <View style={{ flexDirection: 'row', marginRight: 10, marginTop: 5 }}>
-                <TouchableOpacity
-                  onPress={() => { navigation.navigate('MedicineSupply') }}
-                  style={{ marginRight: 10 }}
-                >
-                  <MaterialIcons name="inventory" size={30} color="#0096FF" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => { navigation.navigate('Settings') }}
-                >
-                  <FontAwesome name="gear" size={30} color="#0096FF" />
-                </TouchableOpacity>
-              </View>
-            ),
-            headerLeft: () => (
-              <View style={styles.header}>
-                <View style={styles.headerLeft}>
-                  <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <FontAwesome name="user" size={30} color="#0096FF" />
-                      <Text style={{ fontSize: 18, fontWeight: 'bold', marginLeft: 10 }}>
-                        {user.firstName} {user.lastName}
-                      </Text>
-                    </View>
+      {loggedIn ? (
+        <Stack.Navigator
+          screenOptions={{
+            headerShadowVisible: false,
+            headerTitleAlign: 'center',
+          }}>
+          <Stack.Screen
+            name="Home"
+            options={({ navigation }) => ({
+              headerRight: () => (
+                <View style={{ flexDirection: 'row', marginRight: 10, marginTop: 5 }}>
+                  <TouchableOpacity
+                    onPress={() => { navigation.navigate('MedicineSupply') }}
+                    style={{ marginRight: 10 }}
+                  >
+                    <MaterialIcons name="inventory" size={30} color="#0096FF" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => { navigation.navigate('Settings') }}
+                  >
+                    <FontAwesome name="gear" size={30} color="#0096FF" />
                   </TouchableOpacity>
                 </View>
-              </View>
-            ),
-            headerTitle: '',
-          })}
-        >
-          {(props) => <Home {...props} user={user} />}
-        </Stack.Screen>
-        <Stack.Screen
-          name="Search"
-          component={Search}
-          options={({ navigation }) => ({
-            headerRight: () => (
-              <TouchableOpacity
-                style={{ marginRight: 10, marginTop: 5 }}
-                onPress={() => navigation.navigate('SearchModal')}>
-                <FontAwesome name="plus" size={30} color="#0096FF" />
-              </TouchableOpacity>
-            ),
-            headerTitle: 'Zoeken',
-          })}
-        />
-        <Stack.Screen name="Settings"
-          component={Settings}
-          options={{
-            headerTitle: 'Instellingen',
-          }} />
-        <Stack.Screen
-          name="Profile"
-          options={({ navigation }) => ({
-            headerTitle: 'Profiel',
-            headerRight: () => (
-              <TouchableOpacity onPress={() => console.log('QR gedrukt')}>
-                <FontAwesome name="qrcode" size={30} color="black" style={{ marginRight: 10 }} />
-              </TouchableOpacity>
-            ),
-          })}
-        >
-          {(props) => <Profile {...props} user={user} updateUserInfo={updateUserInfo} />}
-        </Stack.Screen>
-        <Stack.Screen
-          name="SearchModal"
-          component={SearchModal}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="MedicineSupply"
-          component={MedicineSupply}
-          options={{
-            headerTitle: 'Medicijnvoorraad',
-          }}
-        />
-      </Stack.Navigator>
+              ),
+              headerLeft: () => (
+                <View style={styles.header}>
+                  <View style={styles.headerLeft}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <FontAwesome name="user" size={30} color="#0096FF" />
+                        <Text style={{ fontSize: 18, fontWeight: 'bold', marginLeft: 10 }}>
+                          {user.firstName} {user.lastName}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ),
+              headerTitle: '',
+            })}
+          >
+            {(props) => <Home {...props} user={user} />}
+          </Stack.Screen>
+          <Stack.Screen
+            name="Search"
+            component={Search}
+            options={({ navigation }) => ({
+              headerRight: () => (
+                <TouchableOpacity
+                  style={{ marginRight: 10, marginTop: 5 }}
+                  onPress={() => navigation.navigate('SearchModal')}>
+                  <FontAwesome name="plus" size={30} color="#0096FF" />
+                </TouchableOpacity>
+              ),
+              headerTitle: 'Zoeken',
+            })}
+          />
+          <Stack.Screen name="Settings"
+            component={Settings}
+            options={{
+              headerTitle: 'Instellingen',
+            }} />
+          <Stack.Screen
+            name="Profile"
+            options={({ navigation }) => ({
+              headerTitle: 'Profiel',
+              headerRight: () => (
+                <TouchableOpacity onPress={() => console.log('QR gedrukt')}>
+                  <FontAwesome name="qrcode" size={30} color="black" style={{ marginRight: 10 }} />
+                </TouchableOpacity>
+              ),
+            })}
+          >
+            {(props) => <Profile {...props} user={user} updateUserInfo={updateUserInfo} />}
+          </Stack.Screen>
+          <Stack.Screen
+            name="SearchModal"
+            component={SearchModal}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="MedicineSupply"
+            component={MedicineSupply}
+            options={{
+              headerTitle: 'Medicijnvoorraad',
+            }}
+          />
+        </Stack.Navigator>
+      ) : (
+        <Stack.Navigator>
+          <Stack.Screen name="Login" options={{ headerShown: false }}>
+            {(props) => (
+              <Login
+                {...props}
+                loggedIn={loggedIn}
+                handleLoginSuccess={() => setLoggedIn(true)}
+              />
+            )}
+          </Stack.Screen>
+          <Stack.Screen
+            name="Register"
+            component={Register}
+            options={{
+              title: 'Register',
+            }}
+          />
+        </Stack.Navigator>
+      )}
       <StatusBar style="auto" />
     </NavigationContainer>
   );

@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const Register = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [agreeTerms, setAgreeTerms] = useState(false);
 
+    const navigation = useNavigation();
+
     const handleRegister = () => {
         console.log('Registratie test');
     };
 
     const handleLoginRedirect = () => {
-        console.log('Terug naar login test');
+        navigation.goBack()
     };
 
     const handleTermsClick = () => {
@@ -87,6 +90,7 @@ const Register = () => {
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
         justifyContent: 'center',
         backgroundColor: '#fff',
     },
