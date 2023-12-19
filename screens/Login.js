@@ -1,18 +1,25 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
-const Login = () => {
+const Login = ({ handleLoginSuccess }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+
+    const navigation = useNavigation();
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
 
     const handleLogin = () => {
-        console.log('Login testing');
+        handleLoginSuccess();
+    };
+
+    const navigateToRegister = () => {
+        navigation.navigate('Register');
     };
 
     return (
@@ -66,7 +73,7 @@ const Login = () => {
                     <TouchableOpacity>
                         <Text style={styles.lostPassword}>Wachtwoord vergeten?</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={navigateToRegister}>
                         <Text style={styles.register}>Registreren</Text>
                     </TouchableOpacity>
                 </View>
@@ -77,6 +84,7 @@ const Login = () => {
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
         justifyContent: 'center',
         backgroundColor: '#fff',
     },
