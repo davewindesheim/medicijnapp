@@ -270,7 +270,6 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      {loggedIn ? (
         <Stack.Navigator
           screenOptions={{
             headerShadowVisible: false,
@@ -358,26 +357,6 @@ export default function App() {
             }}
           />
         </Stack.Navigator>
-      ) : (
-        <Stack.Navigator>
-          <Stack.Screen name="Login" options={{ headerShown: false }}>
-            {(props) => (
-              <Login
-                {...props}
-                loggedIn={loggedIn}
-                handleLoginSuccess={() => setLoggedIn(true)}
-              />
-            )}
-          </Stack.Screen>
-          <Stack.Screen
-            name="Register"
-            component={Register}
-            options={{
-              title: 'Register',
-            }}
-          />
-        </Stack.Navigator>
-      )}
       <StatusBar style="auto" />
     </NavigationContainer>
   );
