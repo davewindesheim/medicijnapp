@@ -12,6 +12,16 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 // Checkt het home component
 describe('Home component', () => {
 
+    // Bekijkt of het home component succesvol opent
+    it('renders correctly', () => {
+        const { getByText } = render(<Home />);
+
+        // Bekijkt of tekst 'uw medicijnlijst' zichtbaar is
+        const medicijnlijstText = getByText('Uw medicijnlijst');
+        expect(medicijnlijstText).toBeTruthy();
+
+    });
+
     // Bekijkt of vandaag en morgen medicijnen succesvol laden
     it('displays today and tomorrow items correctly', async () => {
         // Mock AsyncStorage data
@@ -21,6 +31,19 @@ describe('Home component', () => {
         ];
 
         AsyncStorage.getItem.mockResolvedValueOnce(JSON.stringify(mockMedicines));
+
+        const { getByText } = render(<Home />);
+
+        await waitFor(() => {
+            expect(AsyncStorage.getItem).toHaveBeenCalled();
+        });
+
+        // Bekijkt of tekst 'Vandaag' en 'Morgen' succesvol laden
+        const todayHeader = getByText('Vandaag');
+        expect(todayHeader).toBeTruthy();
+
+        const tomorrowHeader = getByText('Morgen');
+        expect(tomorrowHeader).toBeTruthy();
 
     });
 });
